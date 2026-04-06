@@ -197,12 +197,6 @@ canvas#distCanvas { width:100%; height:150px; display:block; margin-bottom:7px; 
   margin-top:14px; padding:13px 16px; border:1px solid var(--border);
   font-style:italic; font-size:0.9rem; color:var(--text-dim); line-height:1.72;
 }
-.conf-analysis::before {
-  content:'Oracle Confidence Analysis';
-  display:block; font-family:'Josefin Sans',sans-serif; font-weight:300;
-  font-size:0.54rem; letter-spacing:0.24em; color:var(--gold-dim);
-  text-transform:uppercase; margin-bottom:7px; font-style:normal;
-}
 
 /* DIVINATIONS */
 .div-grid {
@@ -297,15 +291,15 @@ canvas#distCanvas { width:100%; height:150px; display:block; margin-bottom:7px; 
 
   <div class="luck-display">
     <div class="luck-num" id="luckNum">—</div>
-    <div class="luck-pct-label">Luck Percentile · P(X &gt; k)</div>
+    <div class="luck-pct-label">Luck Percentile</div>
   </div>
-  <div class="luck-tier" id="luckTier"></div>
-  <div class="luck-desc"  id="luckDesc"></div>
+  <!--<div class="luck-tier" id="luckTier"></div>-->
+  <!--<div class="luck-desc"  id="luckDesc"></div>-->
 
   <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
   <div class="meter-ends"><span>Cursed</span><span>Neutral</span><span>Blessed</span></div>
 
-  <div class="roll-stat" id="rollStat"></div>
+  <!--<div class="roll-stat" id="rollStat"></div>-->
 
   <!-- DISTRIBUTION -->
   <div class="dist-section">
@@ -320,7 +314,7 @@ canvas#distCanvas { width:100%; height:150px; display:block; margin-bottom:7px; 
       <span id="axMid"></span>
       <span id="axMax"></span>
     </div>
-    <div class="conf-analysis" id="confText"></div>
+    <!--<div class="conf-analysis" id="confText"></div>-->
   </div>
 
   <div class="slabel" style="margin-bottom:10px;">The Oracle's Counsel</div>
@@ -498,8 +492,8 @@ function drawDist(n, attempts, luck) {
 
   document.getElementById('axMid').textContent = Math.round(xMax/2).toLocaleString() + ' attempts';
   document.getElementById('axMax').textContent = Math.round(xMax).toLocaleString()   + ' attempts';
-  document.getElementById('distSub').textContent =
-    `p = 1/${n.toLocaleString()} per roll · gold bar = attempt ${attempts.toLocaleString()} · shaded = P(X > ${attempts.toLocaleString()}) = ${luck.toFixed(2)}%`;
+//   document.getElementById('distSub').textContent =
+//     `p = 1/${n.toLocaleString()} per roll · gold bar = attempt ${attempts.toLocaleString()} · shaded = P(X > ${attempts.toLocaleString()}) = ${luck.toFixed(2)}%`;
 }
 
 // ── MAIN ────────────────────────────────────────────────
@@ -564,12 +558,12 @@ function compute(n, tgt) {
   document.getElementById('resultMeta').textContent =
     seedLabel + '  ·  ' + new Date().toLocaleTimeString();
   document.getElementById('luckNum').textContent    = luck.toFixed(2) + '%';
-  document.getElementById('luckTier').textContent   = tier.label;
-  document.getElementById('luckDesc').textContent   = tier.desc;
-  document.getElementById('rollStat').textContent   =
-    `Target ${tgt} hit on attempt ${attempts.toLocaleString()} of 1–${n.toLocaleString()}  ·  P(X > ${attempts.toLocaleString()}) = ${luck.toFixed(4)}%`;
+//   document.getElementById('luckTier').textContent   = tier.label;
+//   document.getElementById('luckDesc').textContent   = tier.desc;
+//   document.getElementById('rollStat').textContent   =
+//     `Target ${tgt} hit on attempt ${attempts.toLocaleString()} of 1–${n.toLocaleString()}  ·  P(X > ${attempts.toLocaleString()}) = ${luck.toFixed(4)}%`;
   document.getElementById('confBadge').textContent  = conf + '% Confident';
-  document.getElementById('confText').textContent   = body;
+//   document.getElementById('confText').textContent   = body;
   document.getElementById('divGrid').innerHTML      = divHTML;
   document.getElementById('prophecyText').textContent = prophecies(luck);
 
