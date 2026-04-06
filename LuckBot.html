@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORACLE</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0b09;
+  --surface:  #121008;
+  --border:   #2a2218;
+  --border-hi:#4a3c28;
+  --gold:     #b8922a;
+  --gold-hi:  #d4ad4f;
+  --gold-dim: #6b5520;
+  --text:     #e8dfc8;
+  --text-dim: #8a7d64;
+  --text-faint:#3d3428;
+  --red:      #7a1e1e;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cormorant Garamond', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999;
+}
+.wrap { max-width:680px; margin:0 auto; padding:72px 28px 100px; }
+
+/* HEADER */
+header { margin-bottom:56px; border-bottom:1px solid var(--border); padding-bottom:28px; }
+.eyebrow {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.66rem; letter-spacing:0.35em; color:var(--gold-dim);
+  text-transform:uppercase; margin-bottom:14px;
+}
+h1 {
+  font-family:'Libre Baskerville',serif; font-weight:400;
+  font-size:clamp(2.8rem,8vw,5rem); color:var(--text);
+  letter-spacing:-0.02em; line-height:1; margin-bottom:12px;
+}
+h1 em { font-style:italic; color:var(--gold); }
+.header-sub {
+  font-size:1.05rem; color:var(--text-dim);
+  font-style:italic; line-height:1.65; max-width:500px;
+}
+
+/* SECTION LABEL */
+.slabel {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.62rem; letter-spacing:0.3em; color:var(--gold-dim);
+  text-transform:uppercase; margin-bottom:10px;
+}
+
+/* INPUTS */
+.input-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.input-block { display:flex; flex-direction:column; gap:5px; }
+.flabel {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.58rem; letter-spacing:0.25em; color:var(--text-faint);
+  text-transform:uppercase;
+}
+input[type=number] {
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--text); font-family:'Libre Baskerville',serif;
+  font-size:1.5rem; padding:12px 16px; outline:none; width:100%;
+  -moz-appearance:textfield; transition:border-color 0.2s;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+input[type=number]::placeholder { color:var(--text-faint); font-style:italic; font-size:1rem; }
+input[type=number]:focus { border-color:var(--border-hi); }
+input[type=number].err { border-color:var(--red) !important; }
+
+/* SEED */
+.seed-wrap { border-top:1px solid var(--border); padding-top:18px; margin-top:6px; margin-bottom:18px; }
+.seed-tabs { display:flex; border:1px solid var(--border); margin-bottom:14px; }
+.seed-tab {
+  flex:1; background:none; border:none; border-right:1px solid var(--border);
+  padding:8px; font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--text-dim); cursor:pointer; transition:all 0.18s;
+}
+.seed-tab:last-child { border-right:none; }
+.seed-tab:hover { color:var(--text); background:rgba(255,255,255,0.02); }
+.seed-tab.active { color:var(--gold); background:rgba(184,146,42,0.06); }
+.seed-panel { display:none; }
+.seed-panel.active { display:block; }
+.seed-hint { font-style:italic; color:var(--text-faint); font-size:0.9rem; }
+.drop-zone {
+  border:1px dashed var(--border-hi); padding:22px; text-align:center;
+  cursor:pointer; position:relative; transition:all 0.2s;
+}
+.drop-zone:hover,.drop-zone.drag { border-color:var(--gold-dim); background:rgba(184,146,42,0.03); }
+.drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
+.dz-text { font-style:italic; color:var(--text-dim); font-size:0.9rem; }
+.hash-line {
+  margin-top:8px; font-size:0.7rem; color:var(--text-faint);
+  word-break:break-all; font-family:'Josefin Sans',sans-serif;
+  letter-spacing:0.04em; display:none;
+}
+.hash-line.show { display:block; }
+
+/* BUTTON */
+.reveal-btn {
+  width:100%; background:var(--gold); border:none; color:var(--bg);
+  font-family:'Josefin Sans',sans-serif; font-weight:400;
+  font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase;
+  padding:16px; cursor:pointer; transition:background 0.2s;
+}
+.reveal-btn:hover { background:var(--gold-hi); }
+
+/* SPINNER */
+.spin-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(12,11,9,0.93); z-index:200;
+  align-items:center; justify-content:center; flex-direction:column; gap:18px;
+}
+.spin-overlay.on { display:flex; }
+.spin-ring {
+  width:52px; height:52px; border:1px solid var(--border-hi);
+  border-top-color:var(--gold); border-radius:50%;
+  animation:spin 1.1s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.spin-label {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.62rem; letter-spacing:0.32em; color:var(--gold-dim); text-transform:uppercase;
+}
+
+/* RESULT */
+.result { display:none; margin-top:52px; }
+.result.on { display:block; }
+.result-meta {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.6rem; letter-spacing:0.16em; color:var(--text-faint);
+  text-transform:uppercase; margin-bottom:32px;
+  border-bottom:1px solid var(--border); padding-bottom:14px;
+}
+
+.luck-display { display:flex; align-items:baseline; gap:12px; margin-bottom:4px; }
+.luck-num {
+  font-family:'Libre Baskerville',serif; font-size:clamp(4.5rem,16vw,8rem);
+  font-weight:700; color:var(--gold); line-height:1; letter-spacing:-0.03em;
+}
+.luck-pct-label {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.65rem; letter-spacing:0.18em; color:var(--gold-dim);
+  text-transform:uppercase; align-self:flex-end; padding-bottom:14px;
+}
+.luck-tier { font-style:italic; font-size:1.25rem; color:var(--text-dim); margin-bottom:3px; }
+.luck-desc { font-size:0.9rem; color:var(--text-faint); font-style:italic; margin-bottom:24px; }
+
+.meter { height:2px; background:var(--border); margin-bottom:7px; overflow:hidden; }
+.meter-fill {
+  height:100%; width:0%;
+  background:linear-gradient(to right, var(--red), var(--gold), var(--gold-hi));
+  transition:width 1.4s cubic-bezier(0.16,1,0.3,1);
+}
+.meter-ends {
+  display:flex; justify-content:space-between;
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.56rem; letter-spacing:0.18em; color:var(--text-faint);
+  text-transform:uppercase; margin-bottom:24px;
+}
+.roll-stat {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.66rem; letter-spacing:0.08em; color:var(--text-faint);
+  margin-bottom:36px; padding:11px 14px;
+  border-left:2px solid var(--border-hi); font-style:italic;
+}
+
+/* DISTRIBUTION */
+.dist-section { border-top:1px solid var(--border); padding-top:26px; margin-bottom:40px; }
+.dist-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+.conf-badge {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.58rem; letter-spacing:0.14em; color:var(--gold);
+  text-transform:uppercase; border:1px solid var(--gold-dim); padding:2px 7px;
+}
+.dist-sub { font-style:italic; color:var(--text-faint); font-size:0.8rem; margin-bottom:14px; line-height:1.5; }
+canvas#distCanvas { width:100%; height:150px; display:block; margin-bottom:7px; }
+.dist-axis {
+  display:flex; justify-content:space-between;
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.54rem; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase;
+}
+.conf-analysis {
+  margin-top:14px; padding:13px 16px; border:1px solid var(--border);
+  font-style:italic; font-size:0.9rem; color:var(--text-dim); line-height:1.72;
+}
+.conf-analysis::before {
+  content:'Oracle Confidence Analysis';
+  display:block; font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.54rem; letter-spacing:0.24em; color:var(--gold-dim);
+  text-transform:uppercase; margin-bottom:7px; font-style:normal;
+}
+
+/* DIVINATIONS */
+.div-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); margin-bottom:40px;
+}
+.div-cell { background:var(--surface); padding:18px 16px; transition:background 0.18s; }
+.div-cell:hover { background:#161208; }
+.div-cat {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.54rem; letter-spacing:0.26em; color:var(--text-faint);
+  text-transform:uppercase; margin-bottom:7px;
+}
+.div-ans { font-family:'Libre Baskerville',serif; font-size:1.4rem; color:var(--gold-hi); margin-bottom:4px; }
+.div-conf { font-style:italic; font-size:0.82rem; color:var(--text-faint); }
+
+/* PROPHECY */
+.prophecy { border-top:1px solid var(--border); padding-top:26px; margin-bottom:44px; }
+.prophecy-label {
+  font-family:'Josefin Sans',sans-serif; font-weight:300;
+  font-size:0.6rem; letter-spacing:0.3em; color:var(--gold-dim);
+  text-transform:uppercase; margin-bottom:14px;
+}
+.prophecy-text { font-style:italic; font-size:1.18rem; line-height:1.85; color:var(--text); opacity:0.78; }
+
+.disclaimer { font-style:italic; color:var(--text-faint); font-size:0.78rem; border-top:1px solid var(--border); padding-top:14px; }
+
+@media(max-width:500px) {
+  .input-row { grid-template-columns:1fr; }
+  .div-grid  { grid-template-columns:1fr; }
+  h1 { font-size:2.8rem; }
+  .luck-num  { font-size:4.2rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="spin-overlay" id="spinOverlay">
+  <div class="spin-ring"></div>
+  <div class="spin-label">Consulting the fates</div>
+</div>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Probabilistic Divination Engine</div>
+  <h1>The <em>Oracle</em></h1>
+  <p class="header-sub">Set a range N and a target. The oracle rolls 1–N until it hits your number — then measures how rare that wait was against the geometric distribution.</p>
+</header>
+
+<div class="slabel">Parameters</div>
+<div class="input-row">
+  <div class="input-block">
+    <div class="flabel">Range  N</div>
+    <input type="number" id="nValue" placeholder="100" min="2" max="999999999">
+  </div>
+  <div class="input-block">
+    <div class="flabel">Target  (1 – N)</div>
+    <input type="number" id="targetValue" placeholder="7" min="1" max="999999999">
+  </div>
+</div>
+
+<div class="seed-wrap">
+  <div class="slabel">Seed (optional)</div>
+  <div class="seed-tabs">
+    <button class="seed-tab active" onclick="setTab('none',this)">None</button>
+    <button class="seed-tab"        onclick="setTab('number',this)">Number</button>
+    <button class="seed-tab"        onclick="setTab('photo',this)">Photo</button>
+  </div>
+  <div class="seed-panel active" id="panel-none">
+    <p class="seed-hint">A fresh seed is drawn from entropy each reading.</p>
+  </div>
+  <div class="seed-panel" id="panel-number">
+    <div class="flabel" style="margin-bottom:5px;">Seed integer</div>
+    <input type="number" id="seedNumber" placeholder="Any integer…">
+  </div>
+  <div class="seed-panel" id="panel-photo">
+    <div class="drop-zone" id="dropZone">
+      <input type="file" accept="image/*" id="photoInput" onchange="handlePhoto(event)">
+      <div class="dz-text" id="dropText">Drop an image or click — SHA-256 becomes the seed</div>
+    </div>
+    <div class="hash-line" id="hashLine"></div>
+  </div>
+</div>
+
+<button class="reveal-btn" onclick="revealFate()">Reveal My Fate</button>
+
+<!-- RESULT -->
+<div class="result" id="result">
+  <div class="result-meta" id="resultMeta"></div>
+
+  <div class="luck-display">
+    <div class="luck-num" id="luckNum">—</div>
+    <div class="luck-pct-label">Luck Percentile · P(X &gt; k)</div>
+  </div>
+  <div class="luck-tier" id="luckTier"></div>
+  <div class="luck-desc"  id="luckDesc"></div>
+
+  <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
+  <div class="meter-ends"><span>Cursed</span><span>Neutral</span><span>Blessed</span></div>
+
+  <div class="roll-stat" id="rollStat"></div>
+
+  <!-- DISTRIBUTION -->
+  <div class="dist-section">
+    <div class="dist-header">
+      <div class="slabel" style="margin:0;">Geometric Distribution · P(X = k)</div>
+      <div class="conf-badge" id="confBadge">—% Confident</div>
+    </div>
+    <div class="dist-sub" id="distSub"></div>
+    <canvas id="distCanvas" height="150"></canvas>
+    <div class="dist-axis">
+      <span>1</span>
+      <span id="axMid"></span>
+      <span id="axMax"></span>
+    </div>
+    <div class="conf-analysis" id="confText"></div>
+  </div>
+
+  <div class="slabel" style="margin-bottom:10px;">The Oracle's Counsel</div>
+  <div class="div-grid" id="divGrid"></div>
+
+  <div class="prophecy">
+    <div class="prophecy-label">The Oracle Speaks</div>
+    <div class="prophecy-text" id="prophecyText"></div>
+  </div>
+
+  <p class="disclaimer">For entertainment only. The Oracle accepts no responsibility for lost wagers, ill-fated ventures, or matters of the heart.</p>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── PRNG ────────────────────────────────────────────────
+function mulberry32(seed) {
+  return () => {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return h >>> 0;
+}
+async function sha256hex(buf) {
+  const hb = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hb)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── STATE ───────────────────────────────────────────────
+let imageSeed = null, imageHash = null, currentTab = 'none';
+
+function setTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.seed-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.seed-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+async function handlePhoto(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const hash = await sha256hex(await file.arrayBuffer());
+  imageHash = hash; imageSeed = parseInt(hash.slice(0,8), 16);
+  document.getElementById('dropText').innerHTML = `<strong style="color:var(--gold)">${file.name}</strong> — seed ready`;
+  const hl = document.getElementById('hashLine');
+  hl.textContent = 'SHA-256: ' + hash;
+  hl.classList.add('show');
+}
+
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover',  e=>{e.preventDefault(); dz.classList.add('drag');});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
+dz.addEventListener('drop', e=>{
+  e.preventDefault(); dz.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f?.type.startsWith('image/')) {
+    const dt = new DataTransfer(); dt.items.add(f);
+    document.getElementById('photoInput').files = dt.files;
+    handlePhoto({target:{files:[f]}});
+  }
+});
+
+// ── CONTENT ─────────────────────────────────────────────
+const tiers = [
+  {max:5,  label:"Deeply Cursed",        desc:"The fates have turned their backs upon you entirely."},
+  {max:15, label:"Ill-Omened",           desc:"Dark clouds gather at your horizon."},
+  {max:30, label:"Unfortunate",          desc:"Fortune smiles on others today."},
+  {max:50, label:"Neutral",              desc:"The cosmos regards you with indifference."},
+  {max:68, label:"Favoured",             desc:"A current of fortune runs quietly in your direction."},
+  {max:82, label:"Auspicious",           desc:"The stars conspire in your favour."},
+  {max:94, label:"Greatly Blessed",      desc:"The heavens take a particular interest in you today."},
+  {max:100,label:"Supernaturally Lucky", desc:"The universe conspires entirely on your behalf. This is extremely rare."},
+];
+
+const divinations = [
+  { cat:"The Table",    lo:["Banker","Banker","Player","Banker"], hi:["Player","Player","Player","Banker"],
+    cLo:["The house breathes against you","Caution at the felt","A slim light, perhaps"],
+    cHi:["The cards align for you","Bold as the ancients","Your luck arrives before you"] },
+  { cat:"The Wheel",    lo:["Black","Black","Red","Black"], hi:["Red","Red","Red","Black"],
+    cLo:["Retreat into shadow","Darkness protects the cautious","Even odds at best"],
+    cHi:["Red blooms like your fortune","The crimson calls you forward","There is no ambiguity"] },
+  { cat:"The Question", lo:["No","No","No","Yes"], hi:["Yes","Yes","Yes","No"],
+    cLo:["The door is closed","Hold your position","Doubt lingers in the chamber"],
+    cHi:["Without hesitation","The stars confirm it","Proceed — do not look back"] },
+  { cat:"The Choice",   lo:["That","That","This","That"], hi:["This","This","That","This"],
+    cLo:["The other path is safer","Resist the first impulse","The oracle pauses"],
+    cHi:["Your instinct is correct","The first impulse is true","Not a shadow of doubt"] },
+];
+
+const prophecies = p =>
+  p > 82 ? "The stars have aligned in configurations unseen for a generation. What you seek, you shall find — but only if you act before the third bell tolls. The timid inherit dust; the bold inherit everything."
+  : p > 65 ? "Fortune smiles upon you, though her grin carries the subtlety of a crescent moon rather than the full. Proceed with the confidence of one who has studied the odds and found them agreeable."
+  : p > 45 ? "The cosmos sits in careful balance today. Neither wind nor tide favours you unduly — your success rests in your own hands, not in the designs of fate. Make of that what you will."
+  : p > 22 ? "The oracle sees turbulence. The threads of fate run crooked this day, and those who ignore such signs are known to history mainly through cautionary tales. Exercise prudence. Await a better hour."
+  : "Caution. The signs are unambiguous in their severity. Today is a day for watching, not moving — for counting what you have rather than reaching for more. Heed this or do not. The fates will remember either way.";
+
+// Confidence theater
+function fakeConfidence(pct, attempts, n) {
+  // Confidence: high near the tails, slightly lower near median
+  const tailness = Math.abs(pct - 50) / 50; // 0 at median, 1 at extremes
+  const conf = (91.2 + tailness * 7.1 + (Math.random() - 0.5) * 0.8).toFixed(1);
+
+  const expected = n;
+  let body;
+  if (pct > 75) {
+    body = `The geometric model converges strongly at this outcome. Only ${pct.toFixed(2)}% of trials are expected to exceed ${attempts.toLocaleString()} attempts under p = 1/${n.toLocaleString()}, representing a statistically meaningful deviation toward the right tail. The survivor function here decays steeply — ambiguity is minimal. The oracle's confidence is elevated accordingly.`;
+  } else if (pct > 45) {
+    body = `This result falls within one standard deviation of the geometric mean (~${n.toLocaleString()} attempts). The PMF is densest here, which compresses the resolution of individual readings. The oracle has applied median-region calibration, accounting for distributional density when computing the survivor function. The reading holds, though the oracle acknowledges inherent interpretive ambiguity near the expected value.`;
+  } else if (pct > 18) {
+    body = `The left tail begins to dominate. Requiring ${attempts.toLocaleString()} attempts when only ${(100-pct).toFixed(2)}% of trials run this long is statistically instructive. The geometric distribution stretches here — thin probability mass, real outcomes. The oracle's tail-correction model handles this region with heightened precision, drawing on the asymptotic behaviour of (1 − p)^k as k grows large relative to 1/p.`;
+  } else {
+    body = `Extreme left-tail territory. The oracle rarely sees outcomes this rare — fewer than ${pct.toFixed(2)}% of trials under identical parameters require this many attempts. Paradoxically, the oracle considers this its most legible regime: the tails of the geometric distribution leave little room for interpretation. The mathematics is unambiguous. The confidence is, accordingly, near-maximal.`;
+  }
+  return { conf, body };
+}
+
+// ── DRAW DISTRIBUTION ───────────────────────────────────
+function drawDist(n, attempts, luck) {
+  const canvas  = document.getElementById('distCanvas');
+  const dpr     = window.devicePixelRatio || 1;
+  const W       = canvas.offsetWidth;
+  const H       = 150;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const xMax = Math.max(attempts * 1.5, n * 3, 30);
+  const p    = 1 / n;
+  const bars = Math.min(Math.ceil(xMax), 500);
+  const pmf  = Array.from({length:bars}, (_,i) => Math.pow(1-p, i) * p);
+  const yMax = Math.max(...pmf) * 1.1 || 1;
+  const bw   = W / bars;
+
+  // grid lines
+  ctx.strokeStyle = 'rgba(42,34,24,0.8)';
+  ctx.lineWidth   = 0.5;
+  for (let i = 1; i <= 3; i++) {
+    const y = H * 0.06 + (H * 0.86) * (1 - i/4);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+
+  // survivor shading (right of attempts)
+  const attIdx = Math.min(attempts - 1, bars - 1);
+  ctx.fillStyle = 'rgba(184,146,42,0.06)';
+  ctx.fillRect(attIdx * bw, 0, W - attIdx * bw, H);
+
+  // bars
+  for (let i = 0; i < bars; i++) {
+    const barH = (pmf[i] / yMax) * (H * 0.84);
+    const x = i * bw;
+    const y = H - barH - H * 0.06;
+    ctx.fillStyle = i === attIdx ? '#b8922a'
+                  : i > attIdx  ? 'rgba(107,85,32,0.5)'
+                  :               'rgba(52,42,26,0.9)';
+    ctx.fillRect(x + 0.3, y, Math.max(bw - 0.3, 0.4), barH);
+  }
+
+  // dashed vertical at result
+  if (attIdx < bars) {
+    ctx.strokeStyle  = '#d4ad4f';
+    ctx.lineWidth    = 1.2;
+    ctx.setLineDash([3,4]);
+    const lx = attIdx * bw + bw/2;
+    ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  document.getElementById('axMid').textContent = Math.round(xMax/2).toLocaleString() + ' attempts';
+  document.getElementById('axMax').textContent = Math.round(xMax).toLocaleString()   + ' attempts';
+  document.getElementById('distSub').textContent =
+    `p = 1/${n.toLocaleString()} per roll · gold bar = attempt ${attempts.toLocaleString()} · shaded = P(X > ${attempts.toLocaleString()}) = ${luck.toFixed(2)}%`;
+}
+
+// ── MAIN ────────────────────────────────────────────────
+function revealFate() {
+  const nEl  = document.getElementById('nValue');
+  const tEl  = document.getElementById('targetValue');
+  const n    = parseInt(nEl.value);
+  const tgt  = parseInt(tEl.value);
+  const err  = el => { el.classList.add('err'); el.focus(); setTimeout(()=>el.classList.remove('err'),900); };
+
+  if (!n   || n < 2)        { err(nEl); return; }
+  if (!tgt || tgt<1||tgt>n) { err(tEl); return; }
+  if (currentTab==='photo' && imageSeed===null) {
+    dz.style.borderColor='var(--red)'; setTimeout(()=>dz.style.borderColor='',900); return;
+  }
+
+  document.getElementById('spinOverlay').classList.add('on');
+  setTimeout(()=>{ document.getElementById('spinOverlay').classList.remove('on'); compute(n,tgt); }, 1600);
+}
+
+function compute(n, tgt) {
+  // Seed
+  let seed, seedLabel;
+  if (currentTab==='photo' && imageSeed!==null) {
+    seed = imageSeed;
+    seedLabel = `Photo seed · SHA-256: ${imageHash.slice(0,20)}…`;
+  } else if (currentTab==='number') {
+    const raw = document.getElementById('seedNumber').value.trim();
+    seed = raw ? fnv1a(raw) : ((Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF))>>>0);
+    seedLabel = raw ? `Number seed: ${raw}` : `Entropy seed (no number provided)`;
+  } else {
+    seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF))>>>0;
+    seedLabel = `Void seed — unique to this moment`;
+  }
+
+  const rand = mulberry32(seed);
+
+  // Roll until target (geometric, p = 1/n)
+  let attempts = 0;
+  while (attempts < 5_000_000) {
+    attempts++;
+    if (Math.floor(rand() * n) + 1 === tgt) break;
+  }
+
+  // P(X > k) = (1 - 1/n)^k
+  const p    = 1 / n;
+  const luck = Math.min(99.99, Math.max(0.01, Math.pow(1-p, attempts) * 100));
+
+  const tier = tiers.find(t=>luck<=t.max) ?? tiers.at(-1);
+  const { conf, body } = fakeConfidence(luck, attempts, n);
+
+  // Divinations
+  const divHTML = divinations.map(d => {
+    const idx  = Math.floor(rand()*4);
+    const ans  = luck>=50 ? d.hi[idx] : d.lo[idx];
+    const pool = luck>=50 ? d.cHi     : d.cLo;
+    const c    = pool[Math.floor(rand()*pool.length)];
+    return `<div class="div-cell"><div class="div-cat">${d.cat}</div><div class="div-ans">${ans}</div><div class="div-conf">${c}</div></div>`;
+  }).join('');
+
+  // Render
+  document.getElementById('resultMeta').textContent =
+    seedLabel + '  ·  ' + new Date().toLocaleTimeString();
+  document.getElementById('luckNum').textContent    = luck.toFixed(2) + '%';
+  document.getElementById('luckTier').textContent   = tier.label;
+  document.getElementById('luckDesc').textContent   = tier.desc;
+  document.getElementById('rollStat').textContent   =
+    `Target ${tgt} hit on attempt ${attempts.toLocaleString()} of 1–${n.toLocaleString()}  ·  P(X > ${attempts.toLocaleString()}) = ${luck.toFixed(4)}%`;
+  document.getElementById('confBadge').textContent  = conf + '% Confident';
+  document.getElementById('confText').textContent   = body;
+  document.getElementById('divGrid').innerHTML      = divHTML;
+  document.getElementById('prophecyText').textContent = prophecies(luck);
+
+  const fill = document.getElementById('meterFill');
+  fill.style.transition = 'none'; fill.style.width = '0%';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fill.style.transition = 'width 1.4s cubic-bezier(0.16,1,0.3,1)';
+    fill.style.width = Math.min(luck,100)+'%';
+  }));
+
+  const resultEl = document.getElementById('result');
+  resultEl.classList.add('on');
+  resultEl.scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(()=>drawDist(n, attempts, luck), 100);
+}
+
+['nValue','targetValue','seedNumber'].forEach(id=>{
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keydown', e=>{ if(e.key==='Enter') revealFate(); });
+});
+</script>
+</body>
+</html>
